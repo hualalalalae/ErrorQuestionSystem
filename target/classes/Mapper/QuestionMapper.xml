@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.flawsweeper.Mapper.QuestionMapper">
+    <select id="getQuestionMessage" resultMap="questionResult">
+        select
+            *
+        from
+            errorquestion,classify
+        where
+            questionid = #{questionid} and errorquestion.classifyid = classify.classifyid
+    </select>
+
+    <insert id="addQuestion" parameterType="com.example.flawsweeper.Entity.ErrorQuestion" >
+        INSERT INTO
+            errorquestion
+            (uid,title1, title2, titletype, answer, analysis, notes, classifyid, questiontime, imagesrc,incollect)
+        VALUES
+            (#{uid},
+             #{title1},
+             #{title2,typeHandler=com.example.flawsweeper.Common.ListToVarcharTypeHandler},
+             #{titletype},
+             #{answer},
+             #{analysis},
+             #{notes,typeHandler=com.example.flawsweeper.Common.ListToVarcharTypeHandler},
+             #{classifyid},
+             #{questiontime},
+             #{imagesrc},
+             #{incollect})
+        <!-- 指定结果类型resultType，keyProperty是属性，自动返回到属性questionid中，order是次序，after是指获取id是在于插入后 -->
+        <selectKey resultType="int" keyProperty="questionid" order="AFTER">
+            select @@identity
+        </selectKey>
+    </insert>
+
+    <select id="getQuestionClass" resultMap="questionClass">
+        select
+            *
+        from
+            errorquestion
+        where
+            questionid = #{questionid}
+    </select>
+
+    <delete id="deleteQuestion">
+        delete from errorquestion where questionid = #{questionid}
+    </delete>
+
+    <update id="updateinrecycle" parameterType="com.example.flawsweeper.Entity.ErrorQuestion">
+        update
+            errorquestion
+        set inrecycle = 1,
+            incollect = 0
+        where questionid = #{questionid}
+
+    </update>
+    <update id="updateQuestion" parameterType="com.example.flawsweeper.Entity.ErrorQuestion">
+        update errorquestion
+        set
+        title1 = #{title1},
+        title2 = #{title2,typeHandler=com.example.flawsweeper.Common.ListToVarcharTypeHandler},
+        titletype = #{titletype},
+        answer = #{answer},
+        analysis = #{analysis},
+        classifyid = #{classifyid},
+        questiontime = #{questiontime},
+        notes = #{notes,typeHandler=com.example.flawsweeper.Common.ListToVarcharTypeHandler},
+        imagesrc = #{imagesrc},
+        proficiency = #{proficiency}
+        where questionid = #{questionid}
+    </update>
+    <update id="updateIncollect" parameterType="com.example.flawsweeper.Entity.ErrorQuestion">
+        update
+            errorquestion
+        set
+            incollect = 0
+        where
+            questionid = #{questionid}
+    </update>
+    <update id="Intocollect">
+        update
+            errorquestion
+        set
+            incollect = 1
+        where
+            questionid = #{questionid}
+    </update>
+
+    <resultMap id="questionResult" type="java.util.Map">
+        <id column="questionid" property="questionid"></id>
+        <result column="uid" property="uid"></result>
+        <result column="title1" property="title1"></result>
+        <result column="title2" property="title2" typeHandler="com.example.flawsweeper.Common.ListToVarcharTypeHandler"></result>
+        <result column="titletype" property="titletype"></result>
+        <result column="answer" property="answer"></result>
+        <result column="analysis" property="analysis"></result>
+
+        <result column="notes" property="notes" typeHandler="com.example.flawsweeper.Common.ListToVarcharTypeHandler"></result>
+        <result column="classifyid" property="classifyid"></result>
+        <result column="questiontime" property="questiontime"></result>
+        <result column="imagesrc" property="imagesrc"></result>
+        <result column="inrecycle" property="inrecycle"></result>
+        <result column="incollect" property="incollect"></result>
+        <result column="proficiency" property="proficiency"></result>
+    </resultMap>
+
+    <resultMap id="questionRedoResult" type="java.util.Map">
+        <id column="questionid" property="questionid"></id>
+        <result column="uid" property="uid"></result>
+        <result column="title1" property="title1"></result>
+        <result column="title2" property="title2" typeHandler="com.example.flawsweeper.Common.ListToVarcharTypeHandler"></result>
+        <result column="titletype" property="titletype"></result>
+        <result column="answer" property="answer"></result>
+        <result column="analysis" property="analysis"></result>
+
+        <result column="notes" property="notes" typeHandler="com.example.flawsweeper.Common.ListToVarcharTypeHandler"></result>
+        <result column="classifyid" property="classifyid"></result>
+        <result column="questiontime" property="questiontime"></result>
+        <result column="imagesrc" property="imagesrc"></result>
+        <result column="inrecycle" property="inrecycle"></result>
+        <result column="incollect" property="incollect"></result>
+        <result column="classifyname" property="classifyname"></result>
+        <result column="proficiency" property="proficiency"></result>
+    </resultMap>
+
+    <resultMap id="questionClass" type="com.example.flawsweeper.Entity.ErrorQuestion">
+        <id column="questionid" property="questionid"></id>
+        <result column="uid" property="uid"></result>
+        <result column="title1" property="title1"></result>
+        <result column="title2" property="title2" typeHandler="com.example.flawsweeper.Common.ListToVarcharTypeHandler"></result>
+        <result column="titletype" property="titletype"></result>
+        <result column="answer" property="answer"></result>
+        <result column="analysis" property="analysis"></result>
+
+        <result column="notes" property="notes" typeHandler="com.example.flawsweeper.Common.ListToVarcharTypeHandler"></result>
+
+        <result column="classifyid" property="classifyid"></result>
+        <result column="questiontime" property="questiontime"></result>
+        <result column="imagesrc" property="imagesrc"></result>
+        <result column="inrecycle" property="inrecycle"></result>
+        <result column="incollect" property="incollect"></result>
+        <result column="proficiency" property="proficiency"></result>
+    </resultMap>
+
+    <select id="getRedoQuestion" resultMap="questionResult">
+        SELECT
+            *
+        FROM
+            errorquestion
+        LEFT JOIN classify ON errorquestion.classifyid = classify.classifyid
+        <where>
+            <if test="titletype == 0 or titletype == 1">
+                and titletype = #{titletype}
+            </if>
+            <if test="classifyname != null">
+                and classify.classifyname = #{classifyname}
+            </if>
+        </where>
+    </select>
+
+</mapper>
